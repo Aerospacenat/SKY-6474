@@ -1,6 +1,5 @@
 import requests
 import re
-#regex = r"^[^{]*{([^}]*)}.*$"
 ips_read = []
 array = []
 try:
@@ -18,7 +17,7 @@ end = source.find('}};')
 source = source[:end]
 print (source)
 
-f = open("taskfile.rtf", "a")
+
 for part in source.split('DohProviderEntry('):
     end1 = part.find('},')
     select = part[:end1+2]
@@ -30,40 +29,34 @@ for part in source.split('DohProviderEntry('):
     except IndexError as e:
        pass
     array = array+ips
-    f.write(str(ips))
 
-f.close()
+with open('skyText.odt', 'r') as filehandle:
+    ips_read = [current_place.rstrip() for current_place in filehandle.readlines()]
 
-f = open('taskfile.rtf', 'r')
-count = 0
+print(ips_read)
 
-while True:
-    count +=1
-    ips_read = f.readlines()
+def Diff(ips_read, array): 
+    return (list(set(ips_read) - set(array))) 
 
-    if not ips_read:
-        break
-    print(ips_read)
+print("difference")
+diff_lists = Diff( ips_read, array)
+print(diff_lists) 
 
-f.close()
+if diff_lists == []:
+    print("No difference" )
+    exit()
+else :
+    print("Difference, writing to file")
+    with open('skyText.odt', 'w') as filehandle:
+        for ip in array:
+            filehandle.write('%s\n' % ip)
+
+#set(array).intersection(b)
+        
 
 
 
-f = open("taskfile.rtf","r+")
-f.truncate(0)
-f.close()
 
-#print("----------")
 
-#print(array)
-#f = open("taskfile.rtf", "a")
-#f.write(array)
-#f.close()
-#f = open('taskfile.rtf', 'r')
-#lines = f.readlines()
 
-#f.close()
 
-#print (select)   
-
-#matches = re.sub(regex, select, re.MULTILINE)
