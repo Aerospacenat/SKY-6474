@@ -1,7 +1,6 @@
 import requests
 import re
-#regex = r"^[^{]*{([^}]*)}.*$"
-
+ips_read = []
 array = []
 try:
     ret = requests.get('https://raw.githubusercontent.com/chromium/chromium/8574431a884cc99dfb7bdaaeb6cbf3b297fd9fba/net/dns/public/doh_provider_list.cc')
@@ -16,14 +15,13 @@ start = source.find('providers{{')
 source = source[start+11:]
 end = source.find('}};')
 source = source[:end]
-
 print (source)
+
 
 for part in source.split('DohProviderEntry('):
     end1 = part.find('},')
     select = part[:end1+2]
     
-    #matches = re.sub(regex, select, re.MULTILINE)
     match = re.findall(r"^[^{]*{([^}]*)}.*$", select.strip())
     ips = []
     try: 
@@ -31,27 +29,34 @@ for part in source.split('DohProviderEntry('):
     except IndexError as e:
        pass
     array = array+ips
-   
+
+with open('skyText.odt', 'r') as filehandle:
+    ips_read = [current_place.rstrip() for current_place in filehandle.readlines()]
+
+print(ips_read)
+
+def Diff(ips_read, array): 
+    return (list(set(ips_read) - set(array))) 
+
+print("difference")
+diff_lists = Diff( ips_read, array)
+print(diff_lists) 
+
+if diff_lists == []:
+    print("No difference" )
+    exit()
+else :
+    print("Difference, writing to file")
+    with open('skyText.odt', 'w') as filehandle:
+        for ip in array:
+            filehandle.write('%s\n' % ip)
+
+#set(array).intersection(b)
+        
 
 
-print(array)
-    
 
 
-#print("----------")
 
-#print(array)
-f = open("taskfile.rtf", "a")
-f.write(array)
-f.close()
-f = open('taskfile.rtf', 'r')
-#lines = f.readlines()
 
-#f.close()
-
-#print (select)   
-
-#f = open("taskfile.rtf","r+")
-#f.truncate(0)
-#f.close()   
 
