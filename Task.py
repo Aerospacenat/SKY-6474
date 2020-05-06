@@ -38,15 +38,16 @@ print(ips_read)
 def Diff(ips_read, array): 
     return (list(set(ips_read) - set(array))) 
 
-print("difference")
+print("Difference of =")
 diff_lists = Diff( ips_read, array)
 print(diff_lists) 
 
 if diff_lists == []:
-    print("No difference" )
+    print("No difference, will now end" )
     exit()
 else :
     print("Difference, writing to file")
+    print("Red Alert")
     with open('skyText.odt', 'w') as filehandle:
         for ip in array:
             filehandle.write('%s\n' % ip)
