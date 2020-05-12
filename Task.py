@@ -1,5 +1,6 @@
 import requests
 import re
+import sys
 ips_read = []
 array = []
 try:
@@ -17,7 +18,6 @@ end = source.find('}};')
 source = source[:end]
 print (source)
 
-
 for part in source.split('DohProviderEntry('):
     end1 = part.find('},')
     select = part[:end1+2]
@@ -30,34 +30,25 @@ for part in source.split('DohProviderEntry('):
        pass
     array = array+ips
 
-with open('skyText.odt', 'r') as filehandle:
-    ips_read = [current_place.rstrip() for current_place in filehandle.readlines()]
+try:
+    with open('skyText.txt', 'r') as filehandle:
+        ips_read = [current_place.rstrip() for current_place in filehandle.readlines()]
+except FileNotFoundError as e:
+    print("Failed to open file")
+    ips_read = []
 
-print(ips_read)
-
-def Diff(ips_read, array): 
-    return (list(set(ips_read) - set(array))) 
-
-print("Difference of =")
+ 
+def Diff(ips_read, array):
+    return list((set(ips_read) - set(array)).union(set(array) - set(ips_read)))
 diff_lists = Diff( ips_read, array)
-print(diff_lists) 
 
-if diff_lists == []:
-    print("No difference, will now end" )
-    exit()
-else :
+if diff_lists != [] :
     print("Difference, writing to file")
     print("Red Alert")
-    with open('skyText.odt', 'w') as filehandle:
+    with open('skyText.txt', 'w') as filehandle:
         for ip in array:
             filehandle.write('%s\n' % ip)
-
-#set(array).intersection(b)
-        
-
-
-
-
-
-
-
+    sys.exit(1)
+else:
+    print("No difference, will now end" )
+    sys.exit(0)
