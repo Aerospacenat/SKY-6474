@@ -1,9 +1,31 @@
+#! /usr/bin/python
 import requests
 import re
+import sys
+import getopt
 ips_read = []
 array = []
+URL = "https://raw.githubusercontent.com/chromium/chromium/8574431a884cc99dfb7bdaaeb6cbf3b297fd9fba/net/dns/public/doh_provider_list.cc"
+FILE = "skyText.txt"
 try:
-    ret = requests.get('https://raw.githubusercontent.com/chromium/chromium/8574431a884cc99dfb7bdaaeb6cbf3b297fd9fba/net/dns/public/doh_provider_list.cc')
+    opts, args = getopt.getopt(sys.argv[1:], "hu:f:")
+except getopt.GetoptError as err:
+    print(err)  
+    sys.exit(2)
+for o, a in opts:
+    if o == "-h":
+        print("usage: %s -h -f file_with_ips -u source_code_url"  % sys.argv[0])
+        sys.exit(0)
+    elif o in ("-u"):
+        URL = a 
+        sys.exit()
+    elif o in ("-f"):
+        FILE = a
+               
+print("FILE: %s, URL: %s\n" % (FILE, URL))
+
+try:
+    ret = requests.get(URL)
 except e as Exception:
     print("getting source failed: %s" % str(e))
     os.exit(1)
@@ -15,8 +37,6 @@ start = source.find('providers{{')
 source = source[start+11:]
 end = source.find('}};')
 source = source[:end]
-print (source)
-
 
 for part in source.split('DohProviderEntry('):
     end1 = part.find('},')
@@ -30,34 +50,24 @@ for part in source.split('DohProviderEntry('):
        pass
     array = array+ips
 
-with open('skyText.odt', 'r') as filehandle:
-    ips_read = [current_place.rstrip() for current_place in filehandle.readlines()]
+try:
+    with open(FILE, 'r') as filehandle:
+        ips_read = [current_place.rstrip() for current_place in filehandle.readlines()]
+except FileNotFoundError as e:
+    print("Failed to open file")
+    ips_read = []
 
-print(ips_read)
-
-def Diff(ips_read, array): 
-    return (list(set(ips_read) - set(array))) 
-
-print("Difference of =")
+def Diff(ips_read, array):
+    return list((set(ips_read) - set(array)).union(set(array) - set(ips_read)))
 diff_lists = Diff( ips_read, array)
-print(diff_lists) 
 
-if diff_lists == []:
-    print("No difference, will now end" )
-    exit()
-else :
+if diff_lists != [] :
     print("Difference, writing to file")
     print("Red Alert")
-    with open('skyText.odt', 'w') as filehandle:
+    with open(FILE, 'w') as filehandle:
         for ip in array:
             filehandle.write('%s\n' % ip)
-
-#set(array).intersection(b)
-        
-
-
-
-
-
-
-
+    sys.exit(1)
+else:
+    print("No difference, will now end" )
+    sys.exit(0)
